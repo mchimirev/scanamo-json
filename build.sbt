@@ -26,7 +26,7 @@ lazy val root = project
 
 lazy val CirceVersion = "0.12.3"
 lazy val PlayVersion = "2.8.0-M7"
-lazy val ScanamoVersion = "1.0.0-M12"
+lazy val ScanamoVersion = "1.0.0-M12+202-6026bf7b-SNAPSHOT"
 lazy val ScalaTestVersion = "3.1.0-RC2"
 
 lazy val circe = project
