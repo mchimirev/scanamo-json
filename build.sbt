@@ -22,7 +22,7 @@ lazy val root = project
   .settings(commonSettings)
   .settings(crossScalaVersions := Nil)
   .settings(noPublishSettings)
-  .aggregate(circe, play, tests)
+  .aggregate(circe, tests)
 
 lazy val CirceVersion = "0.12.3"
 lazy val PlayVersion = "2.8.0-M7"

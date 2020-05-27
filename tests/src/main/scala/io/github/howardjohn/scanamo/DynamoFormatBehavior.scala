@@ -13,24 +13,62 @@ trait DynamoFormatBehavior extends Matchers with EitherValues { this: FunSuite =
       assert(jsonResp === json)
     }
 
-    test("empty map")(roundTrip("{}", "{M: {},}"))
-    test("integer value")(roundTrip("""{"a":1}""", "{M: {a={N: 1,}},}"))
-    test("string value")(roundTrip("""{"a":"b"}""", "{M: {a={S: b,}},}"))
-    test("bool value")(roundTrip("""{"a":true}""", "{M: {a={BOOL: true}},}"))
-    test("null value")(roundTrip("""{"a":null}""", "{M: {a={NULL: true,}},}"))
-    test("map map")(roundTrip("""{"nested":{"a":1}}""", "{M: {nested={M: {a={N: 1,}},}},}"))
-    test("int list value")(roundTrip("""{"a":[1,2,3]}""", "{M: {a={L: [{N: 1,}, {N: 2,}, {N: 3,}],}},}"))
-    test("string list value")(roundTrip("""{"a":["b","c","d"]}""", "{M: {a={L: [{S: b,}, {S: c,}, {S: d,}],}},}"))
-    test("mixed values")(roundTrip("""{"a":1,"b":"value"}""", "{M: {a={N: 1,}, b={S: value,}},}"))
+    test("empty map")(roundTrip("{}", "AttributeValue(SS=[], NS=[], BS=[], M={}, L=[])"))
+    test("integer value")(
+      roundTrip(
+        """{"a":1}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[])}, L=[])"))
+    test("string value")(
+      roundTrip(
+        """{"a":"b"}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(S=b, SS=[], NS=[], BS=[], M={}, L=[])}, L=[])"))
+    test("bool value")(
+      roundTrip(
+        """{"a":true}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(SS=[], NS=[], BS=[], M={}, L=[], BOOL=true)}, L=[])"))
+    test("null value")(
+      roundTrip(
+        """{"a":null}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(SS=[], NS=[], BS=[], M={}, L=[], NUL=true)}, L=[])"))
+    test("map map")(
+      roundTrip(
+        """{"nested":{"a":1}}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={nested=AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[])}, L=[])}, L=[])"
+      ))
+    test("int list value")(
+      roundTrip(
+        """{"a":[1,2,3]}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(N=2, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(N=3, SS=[], NS=[], BS=[], M={}, L=[])])}, L=[])"
+      ))
+    test("string list value")(
+      roundTrip(
+        """{"a":["b","c","d"]}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(S=b, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(S=c, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(S=d, SS=[], NS=[], BS=[], M={}, L=[])])}, L=[])"
+      ))
+    test("mixed values")(
+      roundTrip(
+        """{"a":1,"b":"value"}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[]), b=AttributeValue(S=value, SS=[], NS=[], BS=[], M={}, L=[])}, L=[])"
+      ))
     test("mixed list") {
-      roundTrip("""{"a":[1,"b",false,null]}""", "{M: {a={L: [{N: 1,}, {S: b,}, {BOOL: false}, {NULL: true,}],}},}")
+      roundTrip(
+        """{"a":[1,"b",false,null]}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(S=b, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(SS=[], NS=[], BS=[], M={}, L=[], BOOL=false), AttributeValue(SS=[], NS=[], BS=[], M={}, L=[], NUL=true)])}, L=[])"
+      )
     }
     test("nested list") {
-      roundTrip("""{"a":[1,[2,[3]]]}""", "{M: {a={L: [{N: 1,}, {L: [{N: 2,}, {L: [{N: 3,}],}],}],}},}")
+      roundTrip(
+        """{"a":[1,[2,[3]]]}""",
+        "AttributeValue(SS=[], NS=[], BS=[], M={a=AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(N=2, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(N=3, SS=[], NS=[], BS=[], M={}, L=[])])])])}, L=[])"
+      )
     }
-    test("just bool")(roundTrip("true", "{BOOL: true}"))
-    test("just number")(roundTrip("1", "{N: 1,}"))
-    test("just string")(roundTrip("\"string\"", "{S: string,}"))
-    test("just list")(roundTrip("[1,2,3]", "{L: [{N: 1,}, {N: 2,}, {N: 3,}],}"))
+    test("just bool")(roundTrip("true", "AttributeValue(SS=[], NS=[], BS=[], M={}, L=[], BOOL=true)"))
+    test("just number")(roundTrip("1", "AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[])"))
+    test("just string")(roundTrip("\"string\"", "AttributeValue(S=string, SS=[], NS=[], BS=[], M={}, L=[])"))
+    test("just list")(
+      roundTrip(
+        "[1,2,3]",
+        "AttributeValue(SS=[], NS=[], BS=[], M={}, L=[AttributeValue(N=1, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(N=2, SS=[], NS=[], BS=[], M={}, L=[]), AttributeValue(N=3, SS=[], NS=[], BS=[], M={}, L=[])])"
+      ))
   }
 }
